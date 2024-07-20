@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Game of Life</title>
+    <style>
+      * {
+        color: #4a4e69;
+        padding: 0;
+        margin: 0;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding-top: 10%;
+      }
+      #gameCanvas {
+        display: inline;
+        background: #f2e9e4;
+        margin: 0 auto;
+      }
+      #grid {
+        position: absolute;
+        pointer-events: none;
+      }
+      .bar {
+        display: flex;
+        justify-content: space-between;
+        width: 720px;
+        padding-top: 10px;
+      }
+
+      .stats {
+        display: flex;
+        flex-direction: column;
+      }
+      .buttons {
+        display: flex;
+        gap: 10px;
+      }
+      .buttons > button {
+        all: unset;
+        text-align: center;
+        border-radius: 5px;
+        background-color: #f2e9e4;
+        width: 80px;
+      }
+      .buttons > button:hover {
+        background-color: #9a8c98;
+        color: #f2e9e4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="grid" width="720" height="720"></canvas>
+      <canvas id="gameCanvas" width="720" height="720"></canvas>
+      <div class="bar">
+        <div class="stats">
+          <span id="generation">Generation: 1</span>
+          <span id="population">Population: 0</span>
+        </div>
+        <div class="buttons">
+          <button id="hideGrid">Hide Grid</button>
+          <button id="playBtn">Play</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+    <script src="index.js"></script>
+  </body>
+</html>
