@@ -30,11 +30,13 @@ function CellState() {
   this.add = function (cell) {
     this.aliveCells.push(cell);
     colourCell(cell.split(" ")[0], cell.split(" ")[1]);
+    updateURL();
   };
   this.remove = function (cell) {
     const idx = this.aliveCells.indexOf(cell);
     if (idx !== -1) this.aliveCells.splice(idx, 1);
     decolourCell(cell.split(" ")[0], cell.split(" ")[1]);
+    updateURL();
   };
   this.toggle = function (cell) {
     if (this.aliveCells.includes(cell)) {
@@ -147,6 +149,7 @@ function handleReset() {
   playBtn.innerText = "Play";
   generationCount.innerText = "Generation: 1";
   populationCount.innerText = "Population: 0";
+  updateURL();
 }
 
 let intervalId;
@@ -170,3 +173,29 @@ function handleHideGrid() {
     hideGridBtn.innerText = "Hide Grid";
   }
 }
+
+function updateURL() {
+  const encodedCells = cellState.aliveCells.map(cell => {
+    const [x, y] = cell.split(" ");
+    return `${String.fromCharCode('A'.charCodeAt(0) + parseInt(x))}${parseInt(y) + 1}`;
+  });
+  const state = encodedCells.join('_');
+  const url = new URL(window.location);
+  url.searchParams.set('state', state);
+  window.history.pushState({}, '', url);
+}
+
+function loadStateFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const state = params.get('state');
+  if (state) {
+    state.split('_').forEach(encodedCell => {
+      const x = encodedCell.charCodeAt(0) - 'A'.charCodeAt(0);
+      const y = parseInt(encodedCell.slice(1), 10) - 1;
+      cellState.add(`${x} ${y}`);
+    });
+  }
+  updateURL();
+}
+
+window.onload = loadStateFromURL;
