@@ -28,12 +28,17 @@
         width: 720px;
         padding-top: 10px;
       }
-      .stats {
+      .topbar {
         display: flex;
         justify-content: center;
         gap: 10px;
         padding-top: 10%;
         padding-bottom: 5px;
+      }
+      .topBarContent {
+        display: flex;
+        justify-content: space-between;
+        width: 720px;
       }
       .buttons {
         display: flex;
@@ -51,12 +56,26 @@
         background-color: #9a8c98;
         color: #f2e9e4;
       }
+      .howItWorks {
+        position: relative;
+        right: 0;
+      }
     </style>
   </head>
   <body>
-    <div class="stats">
-      <span id="generation">Generation: 1</span>
-      <span id="population">Population: 0</span>
+    <div class="topbar">
+      <div class="topBarContent">
+        <div>
+          <span id="generation">Generation: 1</span>
+          <span id="population">Population: 0</span>
+        </div>
+        <a
+          target="_blank"
+          class="howItWorks"
+          href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
+          >How it Works</a
+        >
+      </div>
     </div>
     <div class="container">
       <canvas id="grid" width="720" height="720"></canvas>
