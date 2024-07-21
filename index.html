@@ -14,12 +14,9 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
-        padding-top: 10%;
       }
       #gameCanvas {
-        display: inline;
         background: #f2e9e4;
-        margin: 0 auto;
       }
       #grid {
         position: absolute;
@@ -31,10 +28,12 @@
         width: 720px;
         padding-top: 10px;
       }
-
       .stats {
         display: flex;
-        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        padding-top: 10%;
+        padding-bottom: 5px;
       }
       .buttons {
         display: flex;
@@ -45,7 +44,8 @@
         text-align: center;
         border-radius: 5px;
         background-color: #f2e9e4;
-        width: 80px;
+        min-width: 60px;
+        padding: 7px;
       }
       .buttons > button:hover {
         background-color: #9a8c98;
@@ -54,16 +54,21 @@
     </style>
   </head>
   <body>
+    <div class="stats">
+      <span id="generation">Generation: 1</span>
+      <span id="population">Population: 0</span>
+    </div>
     <div class="container">
       <canvas id="grid" width="720" height="720"></canvas>
       <canvas id="gameCanvas" width="720" height="720"></canvas>
       <div class="bar">
-        <div class="stats">
-          <span id="generation">Generation: 1</span>
-          <span id="population">Population: 0</span>
-        </div>
         <div class="buttons">
           <button id="hideGrid">Hide Grid</button>
+          <button id="shareStarting">Share Starting</button>
+          <button id="shareCurrent">Share Current</button>
+        </div>
+        <div class="buttons">
+          <button id="backToStart">Back to Start</button>
           <button id="playBtn">Play</button>
           <button id="resetBtn">Reset</button>
         </div>

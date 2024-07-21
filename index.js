@@ -8,12 +8,13 @@ const grid = document.getElementById("grid");
 const gridCtx = grid.getContext("2d");
 gridCtx.strokeStyle = "#9a8c98";
 
-setupGrid();
-
 const cellState = new CellState();
 const rows = Math.round(canvas.height / cellSize);
 const cols = Math.round(canvas.width / cellSize);
 
+const shareStartingBtn = document.getElementById("shareStarting");
+const shareCurrentBtn = document.getElementById("shareCurrent");
+const backToStartBtn = document.getElementById("backToStart");
 const hideGridBtn = document.getElementById("hideGrid");
 const playBtn = document.getElementById("playBtn");
 const resetBtn = document.getElementById("resetBtn");
@@ -24,19 +25,27 @@ canvas.addEventListener("click", handleCellSelect);
 playBtn.addEventListener("click", handleStopAndPlay);
 resetBtn.addEventListener("click", handleReset);
 hideGridBtn.addEventListener("click", handleHideGrid);
+backToStartBtn.addEventListener("click", handleBackToStart);
+shareStartingBtn.addEventListener("click", () =>
+  handleCopy.call(shareStartingBtn, "starting")
+);
+shareCurrentBtn.addEventListener("click", () =>
+  handleCopy.call(shareCurrentBtn, "current")
+);
+
+setupGrid();
+window.onload = loadStateFromURL;
 
 function CellState() {
   this.aliveCells = [];
   this.add = function (cell) {
     this.aliveCells.push(cell);
     colourCell(cell.split(" ")[0], cell.split(" ")[1]);
-    updateURL();
   };
   this.remove = function (cell) {
     const idx = this.aliveCells.indexOf(cell);
     if (idx !== -1) this.aliveCells.splice(idx, 1);
     decolourCell(cell.split(" ")[0], cell.split(" ")[1]);
-    updateURL();
   };
   this.toggle = function (cell) {
     if (this.aliveCells.includes(cell)) {
@@ -104,6 +113,7 @@ function playAndUpdateStats() {
 
   toKill.forEach((cell) => cellState.remove(cell));
   toRevive.forEach((cell) => cellState.add(cell));
+  updateCurrentCellsToURL("current");
 
   generationCount.innerText =
     "Generation: " + (parseInt(generationCount.innerText.split(": ")[1]) + 1);
@@ -140,16 +150,13 @@ function handleCellSelect(e) {
   const y = Math.floor(e.offsetY / cellSize);
   cellState.toggle(`${x} ${y}`);
   populationCount.innerText = "Population: " + cellState.aliveCells.length;
+  updateCurrentCellsToURL("starting");
 }
 
 function handleReset() {
-  cellState.aliveCells = [];
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  clearInterval(intervalId);
-  playBtn.innerText = "Play";
-  generationCount.innerText = "Generation: 1";
-  populationCount.innerText = "Population: 0";
-  updateURL();
+  resetBoard();
+  updateCurrentCellsToURL("starting");
+  updateCurrentCellsToURL("current");
 }
 
 let intervalId;
@@ -174,28 +181,78 @@ function handleHideGrid() {
   }
 }
 
-function updateURL() {
-  const encodedCells = cellState.aliveCells.map(cell => {
-    const [x, y] = cell.split(" ");
-    return `${String.fromCharCode('A'.charCodeAt(0) + parseInt(x))}${parseInt(y) + 1}`;
+function handleBackToStart() {
+  resetBoard();
+  const params = new URLSearchParams(window.location.search);
+  const start = params.get("starting");
+  start.split("_").forEach((encodedCell) => {
+    const [x, y] = getIndexesFromAlgebraicNotation(encodedCell);
+    cellState.add(`${x} ${y}`);
   });
-  const state = encodedCells.join('_');
+  updateCurrentCellsToURL("current");
+}
+
+async function handleCopy(paramKey) {
+  const params = new URLSearchParams(window.location.search);
   const url = new URL(window.location);
-  url.searchParams.set('state', state);
-  window.history.pushState({}, '', url);
+  url.searchParams
+    .keys()
+    .forEach((param) => param !== paramKey && url.searchParams.delete(param));
+  await navigator.clipboard.writeText(url.toString());
+  const prevText = this.innerText;
+  this.innerText = "✓ Copied";
+  const textIntervalId = setTimeout(() => {
+    this.innerText = prevText;
+    clearTimeout(textIntervalId);
+  }, 1000);
+}
+
+function resetBoard() {
+  cellState.aliveCells = [];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clearInterval(intervalId);
+  playBtn.innerText = "Play";
+  generationCount.innerText = "Generation: 1";
+  populationCount.innerText = "Population: 0";
+}
+
+function updateCurrentCellsToURL(paramKey) {
+  const encodedCells = cellState.aliveCells.map((cell) => {
+    const [x, y] = cell.split(" ");
+    return `${String.fromCharCode("A".charCodeAt(0) + parseInt(x))}${
+      rows - parseInt(y) - 1
+    }`;
+  });
+  const state = encodedCells.join("_");
+  const url = new URL(window.location);
+  if (state) {
+    url.searchParams.set(paramKey, state);
+  } else {
+    url.searchParams.delete(paramKey);
+  }
+  window.history.replaceState(null, "", url);
 }
 
 function loadStateFromURL() {
   const params = new URLSearchParams(window.location.search);
-  const state = params.get('state');
-  if (state) {
-    state.split('_').forEach(encodedCell => {
-      const x = encodedCell.charCodeAt(0) - 'A'.charCodeAt(0);
-      const y = parseInt(encodedCell.slice(1), 10) - 1;
+  const current = params.get("current");
+  const starting = params.get("starting");
+  if (current) {
+    current.split("_").forEach((encodedCell) => {
+      const [x, y] = getIndexesFromAlgebraicNotation(encodedCell);
+      cellState.add(`${x} ${y}`);
+    });
+  } else if (starting) {
+    starting.split("_").forEach((encodedCell) => {
+      const [x, y] = getIndexesFromAlgebraicNotation(encodedCell);
       cellState.add(`${x} ${y}`);
     });
   }
-  updateURL();
 }
 
-window.onload = loadStateFromURL;
+function getIndexesFromAlgebraicNotation(encoded) {
+  return [
+    encoded.charCodeAt(0) - "A".charCodeAt(0),
+    rows - parseInt(encoded.slice(1)) - 1,
+  ];
+}
