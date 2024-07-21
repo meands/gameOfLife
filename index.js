@@ -194,9 +194,7 @@ function handleBackToStart() {
 
 async function handleCopy(paramKey) {
   const url = new URL(window.location);
-  url.searchParams
-    .keys()
-    .forEach((param) => param !== paramKey && url.searchParams.delete(param));
+  url.search = `?${paramKey}=${url.searchParams.get(paramKey)}`;
   await navigator.clipboard.writeText(url.toString());
   const prevText = this.innerText;
   this.innerText = "✓ Copied";
