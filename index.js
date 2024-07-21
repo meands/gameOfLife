@@ -193,7 +193,6 @@ function handleBackToStart() {
 }
 
 async function handleCopy(paramKey) {
-  const params = new URLSearchParams(window.location.search);
   const url = new URL(window.location);
   url.searchParams
     .keys()
@@ -201,8 +200,10 @@ async function handleCopy(paramKey) {
   await navigator.clipboard.writeText(url.toString());
   const prevText = this.innerText;
   this.innerText = "✓ Copied";
+  this.disabled = true;
   const textIntervalId = setTimeout(() => {
     this.innerText = prevText;
+    this.disabled = false;
     clearTimeout(textIntervalId);
   }, 1000);
 }
